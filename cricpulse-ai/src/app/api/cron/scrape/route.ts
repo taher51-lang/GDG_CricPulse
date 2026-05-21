@@ -1,22 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import FirecrawlApp from "@mendable/firecrawl-js";
 import * as admin from "firebase-admin";
-
-// Initialize Firebase Admin (Backend/Server only)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // Handle newline characters in private keys stored in env vars
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  });
-}
-
-const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY || 'fallback' });
-const db = admin.database();
 
 export async function GET(req: Request) {
   // Simple auth for the cron job (e.g. check a cron secret)
@@ -26,6 +11,21 @@ export async function GET(req: Request) {
   }
 
   try {
+    // Initialize Firebase Admin inside the handler to prevent build-time crashes
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          // Safely handle private keys even if they are malformed during build
+          privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, '\n'),
+        }),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      });
+    }
+
+    const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY || 'fallback' });
+    const db = admin.database();
     // 1. Scrape live cricket scores (Targeting a generic stats page for the demo)
     const url = "https://www.espncricinfo.com/live-cricket-score"; // Target URL
     
