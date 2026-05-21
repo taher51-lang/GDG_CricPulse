@@ -29,10 +29,10 @@ export async function GET(req: Request) {
     // 1. Scrape live cricket scores (Targeting a generic stats page for the demo)
     const url = "https://www.espncricinfo.com/live-cricket-score"; // Target URL
     
-    // We use Firecrawl's Extract feature to pull structured telemetry directly
+    // We use Firecrawl's JSON feature to pull structured telemetry directly
     const scrapeResult = await firecrawl.scrape(url, {
-      formats: ['extract'],
-      extract: {
+      formats: ['json'],
+      jsonOptions: {
         schema: {
           type: "object",
           properties: {
@@ -59,7 +59,7 @@ export async function GET(req: Request) {
       throw new Error("Firecrawl failed to extract match telemetry.");
     }
 
-    const telemetry = scrapeResult.extract;
+    const telemetry = scrapeResult.json;
 
     // 2. Push the scraped structured data into Firebase Realtime DB
     // This instantly triggers all client-side 'onValue' listeners in our Next.js frontend!
