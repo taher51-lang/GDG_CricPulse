@@ -17,13 +17,7 @@ const firebaseConfig = {
 // Ensure we don't re-initialize the app during hot reloads in Next.js
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize App Check for Security (Only in Production client-side)
-if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-recaptcha-key"),
-    isTokenAutoRefreshEnabled: true
-  });
-}
+// App Check removed for hackathon demo to ensure smooth Vercel deployment without ReCaptcha blocking the WebSocket
 
 // Initialize services
 // The Realtime DB handles our sub-second Over Pulse predictions stream

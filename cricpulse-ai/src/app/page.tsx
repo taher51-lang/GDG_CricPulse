@@ -14,6 +14,11 @@ export default function CricPulseDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Fallback: If Firebase fails to connect or hangs, unlock the UI after 3 seconds
+    const connectionTimeout = setTimeout(() => {
+      if (isLoading) setIsLoading(false);
+    }, 3000);
+
     // Listen to the top-level match state for live updates
     // In a real app, 'ipl_2026_m45' would be dynamically fetched based on the current schedule
     const matchRef = ref(realtimeDb, `live_matches/ipl_2026_m45/current_state`);
@@ -26,10 +31,18 @@ export default function CricPulseDashboard() {
         setMatchData(null);
       }
       setIsLoading(false);
+      clearTimeout(connectionTimeout);
+    }, (error) => {
+      console.error("Firebase connection error:", error);
+      setIsLoading(false);
+      clearTimeout(connectionTimeout);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      unsubscribe();
+      clearTimeout(connectionTimeout);
+    };
+  }, [isLoading]);
 
   if (isLoading) {
     return (
