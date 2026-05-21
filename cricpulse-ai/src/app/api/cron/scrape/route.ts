@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     const url = "https://www.espncricinfo.com/live-cricket-score"; // Target URL
     
     // We use Firecrawl's Extract feature to pull structured telemetry directly
-    const scrapeResult = await firecrawl.scrapeUrl(url, {
+    const scrapeResult = await firecrawl.scrape(url, {
       formats: ['extract'],
       extract: {
         schema: {
